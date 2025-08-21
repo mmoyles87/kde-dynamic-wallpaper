@@ -91,11 +91,6 @@ create_release() {
 3. Click \"Get New Wallpapers\" and install the downloaded file
 4. Select \"Dynamic Wallpaper\" from the wallpaper type dropdown
 
-### Package Contents
-- Ready-to-install KDE wallpaper plugin
-- Compatible with KDE Plasma 6
-- No compilation required
-
 ### Links
 - [KDE Store Page](https://store.kde.org/)
 - [GitHub Repository](https://github.com/mmoyles87/kde-dynamic-wallpaper)
