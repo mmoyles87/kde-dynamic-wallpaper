@@ -16,7 +16,7 @@ A KDE Plasma wallpaper plugin that automatically changes your wallpaper based on
 
 ![KDE6 Dynamic Wallpaper Configuration](Screenshot_20250821_065031.png)
 
-*Configuration interface showing location detection options, image settings, and display modes*
+_Configuration interface showing location detection options, image settings, and display modes_
 
 ## Time Periods
 
@@ -163,37 +163,43 @@ This creates a GitHub release with the current version, uploads the package, and
 ### Installation Methods
 
 #### Method 1: KDE Store (Recommended)
+
 1. Open System Settings > Appearance > Wallpaper
 2. Click "Get New Wallpapers..."
 3. Search for "Dynamic Wallpaper"
 4. Click "Install"
 
 #### Method 2: Manual Download & Install
+
 If the KDE Store installation fails, you can install manually:
 
 1. Download the latest `.tar.xz` file from:
+
    - [GitHub Releases](https://github.com/mmoyles87/kde-dynamic-wallpaper/releases)
    - [KDE Store](https://store.kde.org/)
 
 2. Install using command line:
+
    ```bash
    kpackagetool6 --type Plasma/Wallpaper --install kde6-dynamic-wallpaper-1.0.1.tar.xz
    ```
 
 3. Or install manually:
+
    ```bash
    # Extract the package
    tar -xf kde6-dynamic-wallpaper-1.0.1.tar.xz
-   
+
    # Copy to wallpaper directory
    mkdir -p ~/.local/share/plasma/wallpapers/org.kde.plasma.dynamicwallpaper
    cp -r * ~/.local/share/plasma/wallpapers/org.kde.plasma.dynamicwallpaper/
-   
+
    # Restart Plasma
    kquitapp6 plasmashell && kstart plasmashell
    ```
 
 #### Method 3: Development Installation
+
 ```bash
 git clone https://github.com/mmoyles87/kde-dynamic-wallpaper.git
 cd kde6-dynamic-wallpaper
