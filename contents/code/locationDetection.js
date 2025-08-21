@@ -3,26 +3,141 @@
 
 // Check if geolocation is available
 function isGeolocationAvailable() {
-  // For now, this will always return false since we need to implement
-  // system integration for automatic location detection
-  return false;
+  // We can always attempt automatic location detection
+  // Priority: IP-based → GeoClue2 → Timezone estimation
+  return true;
 }
 
-// Get location from system services (placeholder)
-function requestAutomaticLocation(callback) {
-  // This is a placeholder for future implementation
-  // In KDE, we could potentially use:
-  // 1. GeoClue2 service
-  // 2. NetworkManager location data
-  // 3. System timezone-based approximation
+// Get location using IP-based geolocation service
+function getLocationFromIP(callback) {
+  console.log("Attempting IP-based geolocation...");
+  
+  // Use a reliable, free IP geolocation service
+  const ipApiUrl = "http://ip-api.com/json/?fields=status,message,lat,lon,city,country,timezone";
+  
+  const xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      try {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          
+          if (response.status === "success" && response.lat !== undefined && response.lon !== undefined) {
+            const location = {
+              lat: parseFloat(response.lat),
+              lon: parseFloat(response.lon),
+              source: "IP geolocation",
+              city: response.city || "Unknown",
+              country: response.country || "Unknown",
+              timezone: response.timezone || "Unknown"
+            };
+            
+            console.log("IP geolocation successful:", location.city + ", " + location.country, 
+                       "(" + location.lat + ", " + location.lon + ")");
+            
+            if (callback) callback(location);
+            return;
+          } else {
+            console.log("IP geolocation failed:", response.message || "Unknown error");
+          }
+        } else {
+          console.log("IP geolocation request failed with status:", xhr.status);
+        }
+      } catch (e) {
+        console.log("Error parsing IP geolocation response:", e.toString());
+      }
+      
+      // If IP geolocation fails, callback with null
+      if (callback) callback(null);
+    }
+  };
+  
+  xhr.open("GET", ipApiUrl, true);
+  xhr.send();
+}
 
-  console.log("Automatic location detection not yet implemented");
-
-  // For now, return null to indicate failure
-  if (callback) {
-    callback(null);
+// Check if GeoClue2 is available
+function isGeoClue2Available() {
+  try {
+    // Try to check if GeoClue2 service is available
+    // This is a simplified check - in a real implementation you'd use D-Bus
+    const process = Qt.createQmlObject('import QtQuick 2.0; import Qt.labs.platform 1.1; StandardPaths {}', Qt.application, "geoclue-check");
+    
+    // For now, we'll assume it might be available but implement it as a secondary option
+    // This would need proper D-Bus integration in a real implementation
+    return false; // Disable for now until we implement D-Bus calls
+  } catch (e) {
+    return false;
   }
-  return null;
+}
+
+// Get location from GeoClue2 (placeholder for D-Bus implementation)
+function getLocationFromGeoClue2(callback) {
+  console.log("Attempting GeoClue2 geolocation...");
+  
+  // This would require D-Bus integration which is complex in QML
+  // For now, we'll implement this as a placeholder that fails gracefully
+  // In a full implementation, this would:
+  // 1. Connect to org.freedesktop.GeoClue2 service
+  // 2. Create a client
+  // 3. Request location
+  // 4. Parse the response
+  
+  console.log("GeoClue2 not implemented yet - requires D-Bus integration");
+  if (callback) callback(null);
+}
+
+// Get location from system services with multiple fallbacks
+function requestAutomaticLocation(callback) {
+  console.log("Starting automatic location detection...");
+  
+  // Try IP-based geolocation first (most reliable and widely available)
+  getLocationFromIP(function(ipLocation) {
+    if (ipLocation && isValidCoordinate(ipLocation.lat, ipLocation.lon)) {
+      console.log("Using IP-based location:", ipLocation.source);
+      if (callback) callback(ipLocation);
+      return;
+    }
+    
+    console.log("IP-based geolocation failed, trying GeoClue2...");
+    
+    // Try GeoClue2 as secondary option
+    if (isGeoClue2Available()) {
+      getLocationFromGeoClue2(function(geoclueLocation) {
+        if (geoclueLocation && isValidCoordinate(geoclueLocation.lat, geoclueLocation.lon)) {
+          console.log("Using GeoClue2 location:", geoclueLocation.source || "GeoClue2");
+          if (callback) callback(geoclueLocation);
+          return;
+        }
+        
+        console.log("GeoClue2 failed, falling back to timezone estimation...");
+        
+        // Fall back to timezone-based estimation
+        const timezoneLocation = getLocationFromTimezone();
+        if (timezoneLocation && isValidCoordinate(timezoneLocation.lat, timezoneLocation.lon)) {
+          timezoneLocation.source = "Timezone estimation";
+          console.log("Using timezone-based location estimation");
+          if (callback) callback(timezoneLocation);
+        } else {
+          console.log("All location detection methods failed");
+          if (callback) callback(null);
+        }
+      });
+    } else {
+      console.log("GeoClue2 not available, falling back to timezone estimation...");
+      
+      // Fall back to timezone-based estimation
+      const timezoneLocation = getLocationFromTimezone();
+      if (timezoneLocation && isValidCoordinate(timezoneLocation.lat, timezoneLocation.lon)) {
+        timezoneLocation.source = "Timezone estimation";
+        console.log("Using timezone-based location estimation");
+        if (callback) callback(timezoneLocation);
+      } else {
+        console.log("All location detection methods failed");
+        if (callback) callback(null);
+      }
+    }
+  });
 }
 
 // Estimate location from timezone (rough approximation)

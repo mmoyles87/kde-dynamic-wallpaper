@@ -9,9 +9,6 @@ function radToDeg(radians) {
   return (radians * 180) / Math.PI;
 }
 
-// timeCalculations.js - Astronomical calculations for twilight times
-// .pragma library
-
 /**
  * Calculates today's sunrise and sunset hours in local time for the given latitude, longitude.
  * Based on the formulas found in:

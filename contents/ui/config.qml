@@ -28,11 +28,11 @@ ColumnLayout {
     property alias cfg_DuskImage: duskImagePath.text
     property alias cfg_NightImage: nightImagePath.text
     
-    // Hidden control for location mode (0=automatic, 1=manual)
+    // Hidden control for location mode (0=IP geolocation, 1=manual, 2=timezone)
     QtControls2.SpinBox {
         id: locationModeConfig
         visible: false
-        value: 1  // Default to manual mode
+        value: 0  // Default to IP geolocation mode
     }
     
     Kirigami.FormLayout {
@@ -481,16 +481,40 @@ ColumnLayout {
             Kirigami.FormData.isSection: true
         }
         
+        QtControls2.ButtonGroup {
+            id: locationModeGroup
+        }
+        
         QtControls2.RadioButton {
-            id: automaticLocationRadio
+            id: automaticIPLocationRadio
             Kirigami.FormData.label: "Location mode:"
-            text: "Automatic (from timezone)"
+            text: "Automatic (IP-based geolocation)"
             checked: cfg_LocationMode === 0
+            QtControls2.ButtonGroup.group: locationModeGroup
             onCheckedChanged: {
                 if (checked) {
                     cfg_LocationMode = 0
-                    detectAutomaticLocation()
+                    detectIPLocation()
                 }
+            }
+            Component.onCompleted: {
+                console.log("IP geolocation radio button created")
+            }
+        }
+        
+        QtControls2.RadioButton {
+            id: automaticTimezoneRadio
+            text: "Automatic (timezone estimation)"
+            checked: cfg_LocationMode === 2
+            QtControls2.ButtonGroup.group: locationModeGroup
+            onCheckedChanged: {
+                if (checked) {
+                    cfg_LocationMode = 2
+                    detectTimezoneLocation()
+                }
+            }
+            Component.onCompleted: {
+                console.log("Timezone radio button created")
             }
         }
         
@@ -498,18 +522,29 @@ ColumnLayout {
             id: manualLocationRadio
             text: "Manual coordinates"
             checked: cfg_LocationMode === 1
+            QtControls2.ButtonGroup.group: locationModeGroup
             onCheckedChanged: {
                 if (checked) {
                     cfg_LocationMode = 1
                 }
             }
+            Component.onCompleted: {
+                console.log("Manual location radio button created")
+            }
         }
         
         QtControls2.Button {
             Kirigami.FormData.label: ""
-            text: "Detect Location from Timezone"
-            visible: automaticLocationRadio.checked
-            onClicked: detectAutomaticLocation()
+            text: "Detect Location from IP"
+            visible: automaticIPLocationRadio.checked
+            onClicked: detectIPLocation()
+        }
+        
+        QtControls2.Button {
+            Kirigami.FormData.label: ""
+            text: "Detect Location from Timezone" 
+            visible: automaticTimezoneRadio.checked
+            onClicked: detectTimezoneLocation()
         }
         
         QtControls2.SpinBox {
@@ -738,8 +773,31 @@ ColumnLayout {
         }
     }
     
-    // Location detection function
-    function detectAutomaticLocation() {
+    // IP-based location detection function
+    function detectIPLocation() {
+        console.log("Detecting location via IP geolocation...")
+        
+        LocationDetection.requestAutomaticLocation(function(location) {
+            if (location && LocationDetection.isValidCoordinate(location.lat, location.lon)) {
+                // Update the spinboxes with detected coordinates
+                latitudeSpinBox.value = Math.round(location.lat * 1000)
+                longitudeSpinBox.value = Math.round(location.lon * 1000)
+                
+                console.log("IP location detected:", location.lat, location.lon)
+                locationDisplayLabel.text = `Auto (${location.source}): ${LocationDetection.formatCoordinates(location.lat, location.lon)}`
+                
+                if (location.city && location.country) {
+                    locationDisplayLabel.text += ` - ${location.city}, ${location.country}`
+                }
+            } else {
+                console.log("Failed to detect IP location, using default")
+                locationDisplayLabel.text = "Auto: Failed to detect location"
+            }
+        })
+    }
+    
+    // Timezone-based location detection function  
+    function detectTimezoneLocation() {
         console.log("Detecting location from timezone...")
         const location = LocationDetection.getLocationFromTimezone()
         
@@ -748,17 +806,20 @@ ColumnLayout {
             latitudeSpinBox.value = Math.round(location.lat * 1000)
             longitudeSpinBox.value = Math.round(location.lon * 1000)
             
-            console.log("Location detected:", location.lat, location.lon)
-            locationDisplayLabel.text = `Auto: ${LocationDetection.formatCoordinates(location.lat, location.lon)}`
+            console.log("Timezone location detected:", location.lat, location.lon)
+            locationDisplayLabel.text = `Auto (Timezone): ${LocationDetection.formatCoordinates(location.lat, location.lon)}`
         } else {
-            console.log("Failed to detect location, using default")
+            console.log("Failed to detect timezone location, using default")
+            locationDisplayLabel.text = "Auto: Failed to detect location"
         }
     }
     
     // Initialize location on component load
     Component.onCompleted: {
-        if (automaticLocationRadio.checked) {
-            detectAutomaticLocation()
+        if (automaticIPLocationRadio.checked) {
+            detectIPLocation()
+        } else if (automaticTimezoneRadio.checked) {
+            detectTimezoneLocation()
         }
     }
 }
