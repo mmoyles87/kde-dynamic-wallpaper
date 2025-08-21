@@ -5,7 +5,6 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ID="org.kde.plasma.dynamicwallpaper"
 USER_INSTALL_DIR="$HOME/.local/share/plasma/wallpapers/$PLUGIN_ID"
-SYSTEM_INSTALL_DIR="/usr/share/plasma/wallpapers/$PLUGIN_ID"
 
 check_project_root() {
     if [ ! -f "metadata.json" ]; then
@@ -21,13 +20,14 @@ show_usage() {
     echo ""
     echo "Commands:"
     echo "  install     Install to user directory for development"
-    echo "  system      Install system-wide using CMake"
     echo "  test        Install and open wallpaper settings"
+    echo "  test-package Test production package in user directory"
     echo "  logs        Show wallpaper logs in real-time"
     echo "  restart     Restart Plasma shell"
-    echo "  clean       Clean build directories and installations"
-    echo "  uninstall   Remove all installations"
+    echo "  clean       Clean user installations"
+    echo "  uninstall   Remove user installation"
     echo "  package     Create distribution package"
+    echo "  release     Create GitHub release with current version"
     echo "  help        Show this help message"
 }
 
@@ -47,20 +47,6 @@ install_user() {
     echo "1. Open System Settings > Appearance > Wallpaper"
     echo "2. Select 'Dynamic Wallpaper' from dropdown"
     echo "3. Configure and apply"
-}
-
-install_system() {
-    echo "Installing KDE6 Dynamic Wallpaper system-wide..."
-    
-    mkdir -p build
-    cd build
-    
-    cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release
-    make
-    sudo make install
-    
-    cd ..
-    echo "System installation complete!"
 }
 
 test_wallpaper() {
@@ -83,15 +69,9 @@ restart_plasma() {
 }
 
 clean_all() {
-    echo "Cleaning build directories and installations..."
+    echo "Cleaning installations..."
     
-    rm -rf build/
     rm -rf "$USER_INSTALL_DIR"
-    
-    if [ -d "$SYSTEM_INSTALL_DIR" ]; then
-        echo "Removing system installation (requires sudo)..."
-        sudo rm -rf "$SYSTEM_INSTALL_DIR"
-    fi
     
     echo "Clean complete"
 }
@@ -101,12 +81,45 @@ uninstall_all() {
     
     rm -rf "$USER_INSTALL_DIR"
     
-    if [ -d "$SYSTEM_INSTALL_DIR" ]; then
-        echo "Removing system installation (requires sudo)..."
-        sudo rm -rf "$SYSTEM_INSTALL_DIR"
+    echo "Uninstall complete"
+}
+
+test_package() {
+    echo "Testing production package..."
+    
+    # Check if package exists
+    PACKAGE_FILE=$(ls kde6-dynamic-wallpaper-*.tar.xz 2>/dev/null | head -1)
+    if [ -z "$PACKAGE_FILE" ]; then
+        echo "Error: No package file found. Run './dev-helper.sh package' first."
+        exit 1
     fi
     
-    echo "Uninstall complete"
+    echo "Found package: $PACKAGE_FILE"
+    
+    # Remove existing installation
+    rm -rf "$USER_INSTALL_DIR"
+    
+    # Create temporary directory and extract package
+    TEMP_DIR=$(mktemp -d)
+    cd "$TEMP_DIR"
+    tar -xf "$SCRIPT_DIR/$PACKAGE_FILE"
+    
+    # Install from extracted package
+    mkdir -p "$USER_INSTALL_DIR"
+    cp -r * "$USER_INSTALL_DIR/"
+    
+    # Cleanup
+    cd "$SCRIPT_DIR"
+    rm -rf "$TEMP_DIR"
+    
+    echo "Production package installed to: $USER_INSTALL_DIR"
+    echo ""
+    echo "To use:"
+    echo "1. Open System Settings > Appearance > Wallpaper"
+    echo "2. Select 'Dynamic Wallpaper' from dropdown"
+    echo "3. Configure and apply"
+    echo ""
+    echo "Note: This tests the exact package that would be distributed to users."
 }
 
 main() {
@@ -117,11 +130,11 @@ main() {
         install)
             install_user
             ;;
-        system)
-            install_system
-            ;;
         test)
             test_wallpaper
+            ;;
+        test-package)
+            test_package
             ;;
         logs)
             show_logs
@@ -137,6 +150,9 @@ main() {
             ;;
         package)
             ./package.sh
+            ;;
+        release)
+            ./release.sh
             ;;
         help|--help|-h)
             show_usage

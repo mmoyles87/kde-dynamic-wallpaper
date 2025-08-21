@@ -45,30 +45,32 @@ The `dev-helper.sh` script provides all development and installation functions:
 
 ```bash
 ./dev-helper.sh install     # Install to user directory for development
-./dev-helper.sh system      # Install system-wide using CMake
 ./dev-helper.sh test        # Install and open wallpaper settings
+./dev-helper.sh test-package # Test production package in user directory
 ./dev-helper.sh logs        # Show wallpaper logs in real-time
 ./dev-helper.sh restart     # Restart Plasma shell
-./dev-helper.sh clean       # Clean build directories and installations
-./dev-helper.sh uninstall   # Remove all installations
+./dev-helper.sh clean       # Clean user installations
+./dev-helper.sh uninstall   # Remove user installation
 ./dev-helper.sh package     # Create distribution package
 ./dev-helper.sh help        # Show help message
 ```
 
 ## Prerequisites
 
-Install KDE development packages:
+Install KDE development packages (optional, only needed for advanced development):
 
 ```bash
 # Ubuntu/Debian
-sudo apt install kde-dev-scripts cmake extra-cmake-modules qtbase5-dev qtdeclarative5-dev plasma-framework-dev
+sudo apt install kde-dev-scripts qt6-base qt6-declarative plasma-framework-dev
 
 # Arch Linux
-sudo pacman -S kde-dev-scripts cmake extra-cmake-modules qt6-base qt6-declarative plasma-framework
+sudo pacman -S kde-dev-scripts qt6-base qt6-declarative plasma-framework
 
 # Fedora
-sudo dnf install kde-dev-scripts cmake extra-cmake-modules qt6-qtbase-devel qt6-qtdeclarative-devel plasma-devel
+sudo dnf install kde-dev-scripts qt6-qtbase-devel qt6-qtdeclarative-devel plasma-devel
 ```
+
+**Note**: This wallpaper plugin is pure QML/JavaScript and requires no compilation. The above packages are only needed for advanced KDE development work.
 
 ## Configuration
 

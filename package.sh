@@ -25,14 +25,14 @@ create_package() {
     cp -r contents/ "$TEMP_DIR/"
     cp metadata.json "$TEMP_DIR/"
     cp -r images/ "$TEMP_DIR/"
-    cp CMakeLists.txt "$TEMP_DIR/"
     cp README.md "$TEMP_DIR/"
     
-    cd "/tmp"
+    cd "$TEMP_DIR"
     echo "Creating tar.xz archive..."
-    tar -cJf "${PACKAGE_NAME}.tar.xz" "$PACKAGE_NAME"
+    tar -cJf "${PACKAGE_NAME}.tar.xz" *
     
     mv "${PACKAGE_NAME}.tar.xz" "$SCRIPT_DIR/"
+    cd "$SCRIPT_DIR"
     rm -rf "$TEMP_DIR"
     
     echo ""
