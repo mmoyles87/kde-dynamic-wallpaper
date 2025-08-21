@@ -150,28 +150,6 @@ This creates a `.tar.xz` file ready for upload to [KDE Store](https://store.kde.
 3. Select category: Plasma Addons > Wallpapers
 4. Upload the generated `.tar.xz` file
 
-## File Structure
-
-```
-kde6-dynamic-wallpaper/
-├── metadata.json                 # Plugin metadata
-├── contents/
-│   ├── ui/
-│   │   ├── main.qml             # Main wallpaper component
-│   │   └── config.qml           # Configuration UI
-│   ├── code/
-│   │   ├── timeCalculations.js  # Astronomical calculations
-│   │   └── locationDetection.js # Location detection utilities
-│   └── config/
-│       └── main.xml             # Configuration schema
-├── images/                      # Default wallpaper images
-│   ├── 1.jpg, 2.jpg, 3.jpg, 4.jpg
-├── CMakeLists.txt               # Build configuration
-├── dev-helper.sh               # Development utility script
-├── package.sh                  # Distribution packaging script
-└── README.md                   # This file
-```
-
 ## Troubleshooting
 
 ### Common Issues
