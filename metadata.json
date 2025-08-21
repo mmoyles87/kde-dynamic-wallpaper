@@ -1,0 +1,21 @@
+{
+  "KPackageStructure": "Plasma/Wallpaper",
+  "KPlugin": {
+    "Authors": [
+      {
+        "Email": "mattmoyles@gmail.com",
+        "Name": "Dynamic Wallpaper Developer"
+      }
+    ],
+    "Category": "",
+    "Description": "Automatically changes wallpaper based on time of day using astronomical calculations",
+    "Icon": "preferences-desktop-wallpaper",
+    "Id": "org.kde.plasma.dynamicwallpaper",
+    "License": "GPL-2.0+",
+    "Name": "Dynamic Wallpaper",
+    "Version": "1.0.0",
+    "Website": "https://github.com/mmoyles87/kde-dynamic-wallpaper"
+  },
+  "Keywords": "",
+  "X-KDE-ParentApp": "org.kde.plasmashell"
+}

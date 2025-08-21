@@ -1,0 +1,48 @@
+# Build directories
+build/
+build-*/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+install_manifest.txt
+
+# Qt/QML cache
+*.qmlc
+*.jsc
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Package files
+*.tar.gz
+*.tar.xz
+*.zip
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Log files
+*.log
+
+# User-specific configuration
+.env
+.local

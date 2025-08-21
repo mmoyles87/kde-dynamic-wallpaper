@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0 http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+  <kcfgfile name="" />
+
+  <group name="General">
+    <entry name="LocationMode" type="Int">
+      <default>1</default>
+    </entry>
+    <entry name="Latitude" type="Double">
+      <default>40.7128</default>
+    </entry>
+    <entry name="Longitude" type="Double">
+      <default>-74.0060</default>
+    </entry>
+    <entry name="UpdateInterval" type="Int">
+      <default>5</default>
+    </entry>
+    <entry name="ShowDebug" type="Bool">
+      <default>false</default>
+    </entry>
+    <entry name="DawnImage" type="String">
+      <default>/home/matt/projects/kde6-dynamic-wallpaper/images/4.jpg</default>
+    </entry>
+    <entry name="EarlyMorningImage" type="String">
+      <default>/home/matt/projects/kde6-dynamic-wallpaper/images/3.jpg</default>
+    </entry>
+    <entry name="DayImage" type="String">
+      <default>/home/matt/projects/kde6-dynamic-wallpaper/images/2.jpg</default>
+    </entry>
+    <entry name="EveningImage" type="String">
+      <default>/home/matt/projects/kde6-dynamic-wallpaper/images/1.jpg</default>
+    </entry>
+    <entry name="DuskImage" type="String">
+      <default>/home/matt/projects/kde6-dynamic-wallpaper/images/3.jpg</default>
+    </entry>
+    <entry name="NightImage" type="String">
+      <default>/home/matt/projects/kde6-dynamic-wallpaper/images/4.jpg</default>
+    </entry>
+    <entry name="FillMode" type="Int">
+      <default>2</default>
+    </entry>
+  </group>
+</kcfg>
