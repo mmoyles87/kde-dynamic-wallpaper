@@ -12,6 +12,12 @@ A KDE Plasma wallpaper plugin that automatically changes your wallpaper based on
 - **Smooth Transitions**: Automatic updates with configurable intervals
 - **Debug Mode**: Optional overlay showing current time and active image
 
+## Screenshots
+
+![KDE6 Dynamic Wallpaper Configuration](Screenshot_20250821_065031.png)
+
+*Configuration interface showing location detection options, image settings, and display modes*
+
 ## Time Periods
 
 The extension divides the day into 6 distinct periods:

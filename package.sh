@@ -27,6 +27,11 @@ create_package() {
     cp -r images/ "$TEMP_DIR/"
     cp README.md "$TEMP_DIR/"
     
+    # Include any screenshot files
+    if ls Screenshot_*.png >/dev/null 2>&1; then
+        cp Screenshot_*.png "$TEMP_DIR/"
+    fi
+    
     cd "$TEMP_DIR"
     echo "Creating tar.xz archive..."
     tar -cJf "${PACKAGE_NAME}.tar.xz" *
