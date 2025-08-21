@@ -52,6 +52,7 @@ The `dev-helper.sh` script provides all development and installation functions:
 ./dev-helper.sh clean       # Clean user installations
 ./dev-helper.sh uninstall   # Remove user installation
 ./dev-helper.sh package     # Create distribution package
+./dev-helper.sh release     # Create GitHub release with current version
 ./dev-helper.sh help        # Show help message
 ```
 
@@ -145,12 +146,61 @@ Choose from 5 scaling modes:
 
 This creates a `.tar.xz` file ready for upload to [KDE Store](https://store.kde.org/).
 
-### KDE Store Upload
+### Creating GitHub Release
+
+```bash
+./dev-helper.sh release
+```
+
+This creates a GitHub release with the current version, uploads the package, and creates a git tag.
+
+### Installation Methods
+
+#### Method 1: KDE Store (Recommended)
+1. Open System Settings > Appearance > Wallpaper
+2. Click "Get New Wallpapers..."
+3. Search for "Dynamic Wallpaper"
+4. Click "Install"
+
+#### Method 2: Manual Download & Install
+If the KDE Store installation fails, you can install manually:
+
+1. Download the latest `.tar.xz` file from:
+   - [GitHub Releases](https://github.com/mmoyles87/kde-dynamic-wallpaper/releases)
+   - [KDE Store](https://store.kde.org/)
+
+2. Install using command line:
+   ```bash
+   kpackagetool6 --type Plasma/Wallpaper --install kde6-dynamic-wallpaper-1.0.1.tar.xz
+   ```
+
+3. Or install manually:
+   ```bash
+   # Extract the package
+   tar -xf kde6-dynamic-wallpaper-1.0.1.tar.xz
+   
+   # Copy to wallpaper directory
+   mkdir -p ~/.local/share/plasma/wallpapers/org.kde.plasma.dynamicwallpaper
+   cp -r * ~/.local/share/plasma/wallpapers/org.kde.plasma.dynamicwallpaper/
+   
+   # Restart Plasma
+   kquitapp6 plasmashell && kstart plasmashell
+   ```
+
+#### Method 3: Development Installation
+```bash
+git clone https://github.com/mmoyles87/kde-dynamic-wallpaper.git
+cd kde6-dynamic-wallpaper
+./dev-helper.sh install
+```
+
+### KDE Store Publishing
 
 1. Visit [KDE Store](https://store.kde.org/)
 2. Login and click "Add Product"
 3. Select category: Plasma Addons > Wallpapers
 4. Upload the generated `.tar.xz` file
+5. Fill in description, screenshots, and metadata
 
 ## Troubleshooting
 
@@ -161,12 +211,18 @@ This creates a `.tar.xz` file ready for upload to [KDE Store](https://store.kde.
    - Run: `./dev-helper.sh restart` to restart Plasma
    - Check installation: `./dev-helper.sh install`
 
-2. **Images not loading**
+2. **KDE Store installation fails with "Could not read file" error**
+
+   - Use manual installation method instead (see Installation Methods above)
+   - Download directly from GitHub Releases
+   - Install via command line: `kpackagetool6 --type Plasma/Wallpaper --install package.tar.xz`
+
+3. **Images not loading**
 
    - Verify image paths in configuration are correct and accessible
    - Check that image files exist and are readable
 
-3. **Time calculations seem wrong**
+4. **Time calculations seem wrong**
    - Verify latitude/longitude settings in configuration
    - Enable debug mode to see current calculations
    - Use automatic location detection for easier setup
