@@ -5,6 +5,27 @@
   <kcfgfile name="" />
 
   <group name="General">
+    <entry name="TimingMode" type="Int">
+      <default>0</default>
+    </entry>
+    <entry name="DawnTime" type="String">
+      <default>06:00</default>
+    </entry>
+    <entry name="EarlyMorningTime" type="String">
+      <default>07:30</default>
+    </entry>
+    <entry name="DayTime" type="String">
+      <default>09:00</default>
+    </entry>
+    <entry name="EveningTime" type="String">
+      <default>18:00</default>
+    </entry>
+    <entry name="DuskTime" type="String">
+      <default>20:00</default>
+    </entry>
+    <entry name="NightTime" type="String">
+      <default>22:00</default>
+    </entry>
     <entry name="LocationMode" type="Int">
       <default>1</default>
     </entry>

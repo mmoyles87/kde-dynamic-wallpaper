@@ -25,6 +25,16 @@ WallpaperItem {
     
     // Fill mode configuration
     property int fillModeIndex: wallpaper.configuration.FillMode !== undefined ? wallpaper.configuration.FillMode : 2
+
+    // Timing mode (0=astronomical, 1=custom times)
+    property int timingMode: wallpaper.configuration.TimingMode !== undefined ? wallpaper.configuration.TimingMode : 0
+    // Custom time settings
+    property string dawnTime: wallpaper.configuration.DawnTime || "06:00"
+    property string earlyMorningTime: wallpaper.configuration.EarlyMorningTime || "07:30"
+    property string dayTime: wallpaper.configuration.DayTime || "09:00"
+    property string eveningTime: wallpaper.configuration.EveningTime || "18:00"
+    property string duskTime: wallpaper.configuration.DuskTime || "20:00"
+    property string nightTime: wallpaper.configuration.NightTime || "22:00"
     
     // Watch for changes to the configuration
     Connections {
@@ -33,6 +43,13 @@ WallpaperItem {
             console.log("Dynamic Wallpaper: Configuration FillMode changed to", wallpaper.configuration.FillMode)
             fillModeIndex = wallpaper.configuration.FillMode
         }
+    function onTimingModeChanged() { timingMode = wallpaper.configuration.TimingMode }
+    function onDawnTimeChanged() { dawnTime = wallpaper.configuration.DawnTime }
+    function onEarlyMorningTimeChanged() { earlyMorningTime = wallpaper.configuration.EarlyMorningTime }
+    function onDayTimeChanged() { dayTime = wallpaper.configuration.DayTime }
+    function onEveningTimeChanged() { eveningTime = wallpaper.configuration.EveningTime }
+    function onDuskTimeChanged() { duskTime = wallpaper.configuration.DuskTime }
+    function onNightTimeChanged() { nightTime = wallpaper.configuration.NightTime }
     }
     
     // Convert fill mode index to Image.fillMode value
@@ -158,7 +175,20 @@ WallpaperItem {
             night: nightImage
         }
         
-        const newImage = TimeCalc.getWallpaperForTime(latitude, longitude, imagePaths)
+        let newImage
+        if (timingMode === 1) {
+            const customTimes = {
+                dawn: dawnTime,
+                earlyMorning: earlyMorningTime,
+                day: dayTime,
+                evening: eveningTime,
+                dusk: duskTime,
+                night: nightTime
+            }
+            newImage = TimeCalc.getWallpaperForCustomTime(customTimes, imagePaths)
+        } else {
+            newImage = TimeCalc.getWallpaperForTime(latitude, longitude, imagePaths)
+        }
         
         if (newImage !== currentImage) {
             console.log("Dynamic Wallpaper: Changing to", newImage)
@@ -175,7 +205,20 @@ WallpaperItem {
         }
         
         // Schedule next precise update
-        const nextUpdateMs = TimeCalc.getNextUpdateTime(latitude, longitude)
+        let nextUpdateMs
+        if (timingMode === 1) {
+            const customTimes = {
+                dawn: dawnTime,
+                earlyMorning: earlyMorningTime,
+                day: dayTime,
+                evening: eveningTime,
+                dusk: duskTime,
+                night: nightTime
+            }
+            nextUpdateMs = TimeCalc.getNextUpdateTimeCustom(customTimes)
+        } else {
+            nextUpdateMs = TimeCalc.getNextUpdateTime(latitude, longitude)
+        }
         if (nextUpdateMs < updateTimer.interval) {
             preciseTimer.interval = nextUpdateMs
             preciseTimer.start()

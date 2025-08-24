@@ -140,6 +140,53 @@ function inInterval(currentMinutes, startTime, endTime) {
   }
 }
 
+// --- Custom timing helpers ---
+function parseTimeString(timeStr) {
+  const parts = (timeStr || "00:00").split(":");
+  const h = Math.max(0, Math.min(23, parseInt(parts[0] || 0)));
+  const m = Math.max(0, Math.min(59, parseInt(parts[1] || 0)));
+  return h + m / 60;
+}
+
+function getWallpaperForCustomTime(customTimes, imagePaths) {
+  const currentMinutes = getCurrentTimeMinutes();
+
+  const dawn = timeToMinutes(parseTimeString(customTimes.dawn));
+  const early = timeToMinutes(parseTimeString(customTimes.earlyMorning));
+  const day = timeToMinutes(parseTimeString(customTimes.day));
+  const eve = timeToMinutes(parseTimeString(customTimes.evening));
+  const dusk = timeToMinutes(parseTimeString(customTimes.dusk));
+  const night = timeToMinutes(parseTimeString(customTimes.night));
+
+  if (currentMinutes >= dawn && currentMinutes < early) return imagePaths.dawn;
+  if (currentMinutes >= early && currentMinutes < day)
+    return imagePaths.earlyMorning;
+  if (currentMinutes >= day && currentMinutes < eve) return imagePaths.day;
+  if (currentMinutes >= eve && currentMinutes < dusk) return imagePaths.evening;
+  if (currentMinutes >= dusk && currentMinutes < night) return imagePaths.dusk;
+  return imagePaths.night;
+}
+
+function getNextUpdateTimeCustom(customTimes) {
+  const currentMinutes = getCurrentTimeMinutes();
+  const points = [
+    timeToMinutes(parseTimeString(customTimes.dawn)),
+    timeToMinutes(parseTimeString(customTimes.earlyMorning)),
+    timeToMinutes(parseTimeString(customTimes.day)),
+    timeToMinutes(parseTimeString(customTimes.evening)),
+    timeToMinutes(parseTimeString(customTimes.dusk)),
+    timeToMinutes(parseTimeString(customTimes.night)),
+    24 * 60 + timeToMinutes(parseTimeString(customTimes.dawn)),
+  ];
+
+  for (let i = 0; i < points.length; i++) {
+    if (points[i] > currentMinutes) {
+      return (points[i] - currentMinutes) * 60 * 1000;
+    }
+  }
+  return 60 * 60 * 1000;
+}
+
 function getWallpaperForTime(latitude, longitude, imagePaths) {
   const now = new Date();
   const times = getTwilightTimes(now, latitude, longitude);

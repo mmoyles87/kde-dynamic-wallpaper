@@ -20,6 +20,15 @@ ColumnLayout {
     property alias cfg_UpdateInterval: updateIntervalSpinBox.value
     property alias cfg_ShowDebug: debugCheckBox.checked
     property alias cfg_FillMode: fillModeConfig.value
+
+    // Custom timing properties
+    property alias cfg_TimingMode: timingModeConfig.value
+    property alias cfg_DawnTime: dawnTimeConfig.text
+    property alias cfg_EarlyMorningTime: earlyMorningTimeConfig.text
+    property alias cfg_DayTime: dayTimeConfig.text
+    property alias cfg_EveningTime: eveningTimeConfig.text
+    property alias cfg_DuskTime: duskTimeConfig.text
+    property alias cfg_NightTime: nightTimeConfig.text
     
     property alias cfg_DawnImage: dawnImagePath.text
     property alias cfg_EarlyMorningImage: earlyMorningImagePath.text
@@ -37,6 +46,72 @@ ColumnLayout {
     
     Kirigami.FormLayout {
         Layout.fillWidth: true
+        Kirigami.Separator {
+            Kirigami.FormData.label: "Timing Mode"
+            Kirigami.FormData.isSection: true
+        }
+
+        // Hidden config holders
+        QtControls2.SpinBox { id: timingModeConfig; visible: false; value: 0 }
+        QtControls2.TextField { id: dawnTimeConfig; visible: false; text: "06:00" }
+        QtControls2.TextField { id: earlyMorningTimeConfig; visible: false; text: "07:30" }
+        QtControls2.TextField { id: dayTimeConfig; visible: false; text: "09:00" }
+        QtControls2.TextField { id: eveningTimeConfig; visible: false; text: "18:00" }
+        QtControls2.TextField { id: duskTimeConfig; visible: false; text: "20:00" }
+        QtControls2.TextField { id: nightTimeConfig; visible: false; text: "22:00" }
+
+        QtControls2.ButtonGroup { id: timingModeGroup }
+        QtControls2.RadioButton {
+            Kirigami.FormData.label: "Wallpaper timing:";
+            text: "Astronomical (sunrise/sunset)"
+            checked: cfg_TimingMode === 0
+            QtControls2.ButtonGroup.group: timingModeGroup
+            onCheckedChanged: if (checked) cfg_TimingMode = 0
+        }
+        QtControls2.RadioButton {
+            text: "Custom time periods"
+            checked: cfg_TimingMode === 1
+            QtControls2.ButtonGroup.group: timingModeGroup
+            onCheckedChanged: if (checked) cfg_TimingMode = 1
+        }
+
+        // Custom time pickers
+        RowLayout {
+            Kirigami.FormData.label: "Dawn starts at:"; visible: cfg_TimingMode === 1
+            QtControls2.SpinBox { id: dawnH; from: 0; to: 23; value: 6; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: dawnTimeConfig.text = `${dawnH.value.toString().padStart(2,'0')}:${dawnM.value.toString().padStart(2,'0')}` }
+            QtControls2.Label { text: ":" }
+            QtControls2.SpinBox { id: dawnM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: dawnTimeConfig.text = `${dawnH.value.toString().padStart(2,'0')}:${dawnM.value.toString().padStart(2,'0')}` }
+        }
+        RowLayout {
+            Kirigami.FormData.label: "Early morning:"; visible: cfg_TimingMode === 1
+            QtControls2.SpinBox { id: earlyH; from: 0; to: 23; value: 7; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: earlyMorningTimeConfig.text = `${earlyH.value.toString().padStart(2,'0')}:${earlyM.value.toString().padStart(2,'0')}` }
+            QtControls2.Label { text: ":" }
+            QtControls2.SpinBox { id: earlyM; from: 0; to: 59; value: 30; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: earlyMorningTimeConfig.text = `${earlyH.value.toString().padStart(2,'0')}:${earlyM.value.toString().padStart(2,'0')}` }
+        }
+        RowLayout {
+            Kirigami.FormData.label: "Day starts at:"; visible: cfg_TimingMode === 1
+            QtControls2.SpinBox { id: dayH; from: 0; to: 23; value: 9; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: dayTimeConfig.text = `${dayH.value.toString().padStart(2,'0')}:${dayM.value.toString().padStart(2,'0')}` }
+            QtControls2.Label { text: ":" }
+            QtControls2.SpinBox { id: dayM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: dayTimeConfig.text = `${dayH.value.toString().padStart(2,'0')}:${dayM.value.toString().padStart(2,'0')}` }
+        }
+        RowLayout {
+            Kirigami.FormData.label: "Evening starts at:"; visible: cfg_TimingMode === 1
+            QtControls2.SpinBox { id: eveH; from: 0; to: 23; value: 18; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: eveningTimeConfig.text = `${eveH.value.toString().padStart(2,'0')}:${eveM.value.toString().padStart(2,'0')}` }
+            QtControls2.Label { text: ":" }
+            QtControls2.SpinBox { id: eveM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: eveningTimeConfig.text = `${eveH.value.toString().padStart(2,'0')}:${eveM.value.toString().padStart(2,'0')}` }
+        }
+        RowLayout {
+            Kirigami.FormData.label: "Dusk starts at:"; visible: cfg_TimingMode === 1
+            QtControls2.SpinBox { id: duskH; from: 0; to: 23; value: 20; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: duskTimeConfig.text = `${duskH.value.toString().padStart(2,'0')}:${duskM.value.toString().padStart(2,'0')}` }
+            QtControls2.Label { text: ":" }
+            QtControls2.SpinBox { id: duskM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: duskTimeConfig.text = `${duskH.value.toString().padStart(2,'0')}:${duskM.value.toString().padStart(2,'0')}` }
+        }
+        RowLayout {
+            Kirigami.FormData.label: "Night starts at:"; visible: cfg_TimingMode === 1
+            QtControls2.SpinBox { id: nightH; from: 0; to: 23; value: 22; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: nightTimeConfig.text = `${nightH.value.toString().padStart(2,'0')}:${nightM.value.toString().padStart(2,'0')}` }
+            QtControls2.Label { text: ":" }
+            QtControls2.SpinBox { id: nightM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: nightTimeConfig.text = `${nightH.value.toString().padStart(2,'0')}:${nightM.value.toString().padStart(2,'0')}` }
+        }
         
         Kirigami.Separator {
             Kirigami.FormData.label: "Wallpaper Images"
@@ -479,6 +554,7 @@ ColumnLayout {
         Kirigami.Separator {
             Kirigami.FormData.label: "Location Settings"
             Kirigami.FormData.isSection: true
+            visible: cfg_TimingMode === 0
         }
         
         QtControls2.ButtonGroup {
@@ -489,6 +565,7 @@ ColumnLayout {
             id: automaticIPLocationRadio
             Kirigami.FormData.label: "Location mode:"
             text: "Automatic (IP-based geolocation)"
+            visible: cfg_TimingMode === 0
             checked: cfg_LocationMode === 0
             QtControls2.ButtonGroup.group: locationModeGroup
             onCheckedChanged: {
@@ -505,6 +582,7 @@ ColumnLayout {
         QtControls2.RadioButton {
             id: automaticTimezoneRadio
             text: "Automatic (timezone estimation)"
+            visible: cfg_TimingMode === 0
             checked: cfg_LocationMode === 2
             QtControls2.ButtonGroup.group: locationModeGroup
             onCheckedChanged: {
@@ -536,14 +614,14 @@ ColumnLayout {
         QtControls2.Button {
             Kirigami.FormData.label: ""
             text: "Detect Location from IP"
-            visible: automaticIPLocationRadio.checked
+            visible: cfg_TimingMode === 0 && automaticIPLocationRadio.checked
             onClicked: detectIPLocation()
         }
         
         QtControls2.Button {
             Kirigami.FormData.label: ""
             text: "Detect Location from Timezone" 
-            visible: automaticTimezoneRadio.checked
+            visible: cfg_TimingMode === 0 && automaticTimezoneRadio.checked
             onClicked: detectTimezoneLocation()
         }
         
@@ -554,7 +632,8 @@ ColumnLayout {
             to: 90000
             stepSize: 1
             value: 40728  // Default: NYC (40.728)
-            enabled: manualLocationRadio.checked
+            enabled: cfg_TimingMode === 0 && manualLocationRadio.checked
+            visible: cfg_TimingMode === 0
             
             property real realValue: value / 1000
             
@@ -567,14 +646,15 @@ ColumnLayout {
             }
         }
         
-        QtControls2.SpinBox {
+    QtControls2.SpinBox {
             id: longitudeSpinBox
             Kirigami.FormData.label: "Longitude:"
             from: -180000
             to: 180000
             stepSize: 1
             value: -74006  // Default: NYC (-74.006)
-            enabled: manualLocationRadio.checked
+            enabled: cfg_TimingMode === 0 && manualLocationRadio.checked
+            visible: cfg_TimingMode === 0
             
             property real realValue: value / 1000
             
@@ -590,6 +670,7 @@ ColumnLayout {
         QtControls2.Label {
             id: locationDisplayLabel
             Kirigami.FormData.label: "Current location:"
+            visible: cfg_TimingMode === 0
             text: {
                 if (automaticLocationRadio.checked) {
                     return `Auto: ${LocationDetection.formatCoordinates(latitudeSpinBox.realValue, longitudeSpinBox.realValue)}`
