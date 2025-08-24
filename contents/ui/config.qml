@@ -824,13 +824,60 @@ ColumnLayout {
                     const lat = latitudeSpinBox.realValue
                     const lon = longitudeSpinBox.realValue
                     const now = new Date()
-                    
+
                     let info = `Location: ${lat.toFixed(3)}°, ${lon.toFixed(3)}°\n`
                     info += `Current Time: ${now.toLocaleString()}\n\n`
-                    
-                    // Calculate times using TimeCalc
+
+                    if (cfg_TimingMode === 1) {
+                        // Custom time mode
+                        const c = {
+                            dawn: dawnTimeConfig.text || "06:00",
+                            early: earlyMorningTimeConfig.text || "07:30",
+                            day: dayTimeConfig.text || "09:00",
+                            eve: eveningTimeConfig.text || "18:00",
+                            dusk: duskTimeConfig.text || "20:00",
+                            night: nightTimeConfig.text || "22:00"
+                        }
+
+                        info += "Custom Time Periods (HH:MM):\n\n"
+                        info += `🌅 Dawn: ${c.dawn}\n`
+                        info += `🌇 Early Morning: ${c.early}\n`
+                        info += `☀️ Day: ${c.day}\n`
+                        info += `🌆 Evening: ${c.eve}\n`
+                        info += `🌇 Dusk: ${c.dusk}\n`
+                        info += `🌙 Night: ${c.night}\n\n`
+
+                        // Show intervals and current period
+                        function mm(t){ return TimeCalc.timeToMinutes(TimeCalc.parseTimeString(t)) }
+                        const mNow = now.getHours()*60 + now.getMinutes()
+                        const intervals = [
+                            {label:"🌅 Dawn", start:mm(c.dawn), end:mm(c.early)},
+                            {label:"🌇 Early Morning", start:mm(c.early), end:mm(c.day)},
+                            {label:"☀️ Day", start:mm(c.day), end:mm(c.eve)},
+                            {label:"🌆 Evening", start:mm(c.eve), end:mm(c.dusk)},
+                            {label:"🌇 Dusk", start:mm(c.dusk), end:mm(c.night)},
+                            {label:"🌙 Night", start:mm(c.night), end:mm(c.dawn)+24*60}
+                        ]
+                        let currentLabel = ""
+                        for (let i=0;i<intervals.length;i++){
+                            const s = intervals[i].start
+                            const e = intervals[i].end
+                            const within = (s <= e ? (mNow>=s && mNow<e) : (mNow>=s || mNow<e))
+                            if (within && !currentLabel) currentLabel = intervals[i].label
+                        }
+                        info += "Intervals:\n"
+                        info += `${c.dawn} → ${c.early} (Dawn)\n`
+                        info += `${c.early} → ${c.day} (Early Morning)\n`
+                        info += `${c.day} → ${c.eve} (Day)\n`
+                        info += `${c.eve} → ${c.dusk} (Evening)\n`
+                        info += `${c.dusk} → ${c.night} (Dusk)\n`
+                        info += `${c.night} → next ${c.dawn} (Night)\n\n`
+                        if (currentLabel) info += `Current period: ${currentLabel}\n`
+                        return info
+                    }
+
+                    // Astronomical mode
                     const times = TimeCalc.getTwilightTimes(now, lat, lon)
-                    
                     if (times) {
                         info += "Today's Time Periods:\n\n"
                         info += `Astronomical Dawn: ${formatTime(times.astronomicalTwilightSunrise)}\n`
@@ -839,7 +886,7 @@ ColumnLayout {
                         info += `Sunset: ${formatTime(times.sunset)}\n`
                         info += `Civil Dusk: ${formatTime(times.civilTwilightSunset)}\n`
                         info += `Astronomical Dusk: ${formatTime(times.astronomicalTwilightSunset)}\n\n`
-                        
+
                         info += "Wallpaper Periods:\n\n"
                         info += `🌅 Dawn: ${formatTime(times.astronomicalTwilightSunrise)} - ${formatTime(times.civilTwilightSunrise)}\n`
                         info += `🌇 Early Morning: ${formatTime(times.civilTwilightSunrise)} - ${formatTime(times.sunrise + 2)}\n`
@@ -851,7 +898,7 @@ ColumnLayout {
                         info += "Unable to calculate times for this location.\n"
                         info += "You may be in a polar region or the coordinates are invalid."
                     }
-                    
+
                     return info
                 }
                 
