@@ -141,6 +141,135 @@ ColumnLayout {
         Connections { target: eveningTimeConfig; function onTextChanged() { root.__initializing = true; const p = eveningTimeConfig.text.split(":"); eveH.value = parseInt(p[0]||0); eveM.value = parseInt(p[1]||0); root.__initializing = false } }
         Connections { target: duskTimeConfig; function onTextChanged() { root.__initializing = true; const p = duskTimeConfig.text.split(":"); duskH.value = parseInt(p[0]||0); duskM.value = parseInt(p[1]||0); root.__initializing = false } }
         Connections { target: nightTimeConfig; function onTextChanged() { root.__initializing = true; const p = nightTimeConfig.text.split(":"); nightH.value = parseInt(p[0]||0); nightM.value = parseInt(p[1]||0); root.__initializing = false } }
+
+        // Show time periods button (belongs to Timing Mode section)
+        QtControls2.Button {
+            Kirigami.FormData.label: "Current Time Information:"
+            text: "Show Time Periods"
+            onClicked: timeInfoPopup.open()
+        }
+        
+        // Location (Astronomical) Settings — shown only when using Astronomical timing
+        Kirigami.Separator {
+            Kirigami.FormData.label: "Location Settings"
+            Kirigami.FormData.isSection: true
+            visible: cfg_TimingMode === 0
+        }
+        
+        QtControls2.ButtonGroup { id: locationModeGroup }
+        
+        QtControls2.RadioButton {
+            id: automaticIPLocationRadio
+            Kirigami.FormData.label: "Location mode:"
+            text: "Automatic (IP-based geolocation)"
+            visible: cfg_TimingMode === 0
+            checked: cfg_LocationMode === 0
+            QtControls2.ButtonGroup.group: locationModeGroup
+            onCheckedChanged: {
+                if (checked && !root.__initializing) {
+                    cfg_LocationMode = 0
+                    detectIPLocation()
+                }
+            }
+        }
+        
+        QtControls2.RadioButton {
+            id: automaticTimezoneRadio
+            text: "Automatic (timezone estimation)"
+            visible: cfg_TimingMode === 0
+            checked: cfg_LocationMode === 2
+            QtControls2.ButtonGroup.group: locationModeGroup
+            onCheckedChanged: {
+                if (checked && !root.__initializing) {
+                    cfg_LocationMode = 2
+                    detectTimezoneLocation()
+                }
+            }
+        }
+        
+        QtControls2.RadioButton {
+            id: manualLocationRadio
+            text: "Manual coordinates"
+            visible: cfg_TimingMode === 0
+            checked: cfg_LocationMode === 1
+            QtControls2.ButtonGroup.group: locationModeGroup
+            onCheckedChanged: {
+                if (checked && !root.__initializing) {
+                    cfg_LocationMode = 1
+                }
+            }
+        }
+        
+        QtControls2.Button {
+            Kirigami.FormData.label: ""
+            text: "Detect Location from IP"
+            visible: cfg_TimingMode === 0 && automaticIPLocationRadio.checked
+            onClicked: detectIPLocation()
+        }
+        
+        QtControls2.Button {
+            Kirigami.FormData.label: ""
+            text: "Detect Location from Timezone" 
+            visible: cfg_TimingMode === 0 && automaticTimezoneRadio.checked
+            onClicked: detectTimezoneLocation()
+        }
+        
+        QtControls2.SpinBox {
+            id: latitudeSpinBox
+            Kirigami.FormData.label: "Latitude:"
+            from: -90000
+            to: 90000
+            stepSize: 1
+            value: 40728  // Default: NYC (40.728)
+            enabled: cfg_TimingMode === 0 && manualLocationRadio.checked
+            visible: cfg_TimingMode === 0
+            
+            property real realValue: value / 1000
+            
+            textFromValue: function(value, locale) {
+                return (value / 1000).toFixed(3) + "°"
+            }
+            
+            valueFromText: function(text, locale) {
+                return Math.round(parseFloat(text.replace('°', '')) * 1000)
+            }
+        }
+        
+        QtControls2.SpinBox {
+            id: longitudeSpinBox
+            Kirigami.FormData.label: "Longitude:"
+            from: -180000
+            to: 180000
+            stepSize: 1
+            value: -74006  // Default: NYC (-74.006)
+            enabled: cfg_TimingMode === 0 && manualLocationRadio.checked
+            visible: cfg_TimingMode === 0
+            
+            property real realValue: value / 1000
+            
+            textFromValue: function(value, locale) {
+                return (value / 1000).toFixed(3) + "°"
+            }
+            
+            valueFromText: function(text, locale) {
+                return Math.round(parseFloat(text.replace('°', '')) * 1000)
+            }
+        }
+        
+        QtControls2.Label {
+            id: locationDisplayLabel
+            Kirigami.FormData.label: "Current location:"
+            visible: cfg_TimingMode === 0
+            text: {
+                if (automaticIPLocationRadio.checked || automaticTimezoneRadio.checked) {
+                    return `Auto: ${LocationDetection.formatCoordinates(latitudeSpinBox.realValue, longitudeSpinBox.realValue)}`
+                } else {
+                    return LocationDetection.formatCoordinates(latitudeSpinBox.realValue, longitudeSpinBox.realValue)
+                }
+            }
+            opacity: 0.8
+            font.pointSize: Kirigami.Theme.smallFont.pointSize
+        }
         
         Kirigami.Separator {
             Kirigami.FormData.label: "Wallpaper Images"
@@ -580,142 +709,8 @@ ColumnLayout {
             }
         }
         
-        Kirigami.Separator {
-            Kirigami.FormData.label: "Location Settings"
-            Kirigami.FormData.isSection: true
-            visible: cfg_TimingMode === 0
-        }
         
-        QtControls2.ButtonGroup {
-            id: locationModeGroup
-        }
-        
-        QtControls2.RadioButton {
-            id: automaticIPLocationRadio
-            Kirigami.FormData.label: "Location mode:"
-            text: "Automatic (IP-based geolocation)"
-            visible: cfg_TimingMode === 0
-            checked: cfg_LocationMode === 0
-            QtControls2.ButtonGroup.group: locationModeGroup
-            onCheckedChanged: {
-                if (checked && !root.__initializing) {
-                    cfg_LocationMode = 0
-                    detectIPLocation()
-                }
-            }
-            Component.onCompleted: {
-                console.log("IP geolocation radio button created")
-            }
-        }
-        
-        QtControls2.RadioButton {
-            id: automaticTimezoneRadio
-            text: "Automatic (timezone estimation)"
-            visible: cfg_TimingMode === 0
-            checked: cfg_LocationMode === 2
-            QtControls2.ButtonGroup.group: locationModeGroup
-            onCheckedChanged: {
-                if (checked && !root.__initializing) {
-                    cfg_LocationMode = 2
-                    detectTimezoneLocation()
-                }
-            }
-            Component.onCompleted: {
-                console.log("Timezone radio button created")
-            }
-        }
-        
-        QtControls2.RadioButton {
-            id: manualLocationRadio
-            text: "Manual coordinates"
-            checked: cfg_LocationMode === 1
-            QtControls2.ButtonGroup.group: locationModeGroup
-            onCheckedChanged: {
-                if (checked && !root.__initializing) {
-                    cfg_LocationMode = 1
-                }
-            }
-            Component.onCompleted: {
-                console.log("Manual location radio button created")
-            }
-        }
-        
-        QtControls2.Button {
-            Kirigami.FormData.label: ""
-            text: "Detect Location from IP"
-            visible: cfg_TimingMode === 0 && automaticIPLocationRadio.checked
-            onClicked: detectIPLocation()
-        }
-        
-        QtControls2.Button {
-            Kirigami.FormData.label: ""
-            text: "Detect Location from Timezone" 
-            visible: cfg_TimingMode === 0 && automaticTimezoneRadio.checked
-            onClicked: detectTimezoneLocation()
-        }
-        
-        QtControls2.SpinBox {
-            id: latitudeSpinBox
-            Kirigami.FormData.label: "Latitude:"
-            from: -90000
-            to: 90000
-            stepSize: 1
-            value: 40728  // Default: NYC (40.728)
-            enabled: cfg_TimingMode === 0 && manualLocationRadio.checked
-            visible: cfg_TimingMode === 0
-            
-            property real realValue: value / 1000
-            
-            textFromValue: function(value, locale) {
-                return (value / 1000).toFixed(3) + "°"
-            }
-            
-            valueFromText: function(text, locale) {
-                return Math.round(parseFloat(text.replace('°', '')) * 1000)
-            }
-        }
-        
-    QtControls2.SpinBox {
-            id: longitudeSpinBox
-            Kirigami.FormData.label: "Longitude:"
-            from: -180000
-            to: 180000
-            stepSize: 1
-            value: -74006  // Default: NYC (-74.006)
-            enabled: cfg_TimingMode === 0 && manualLocationRadio.checked
-            visible: cfg_TimingMode === 0
-            
-            property real realValue: value / 1000
-            
-            textFromValue: function(value, locale) {
-                return (value / 1000).toFixed(3) + "°"
-            }
-            
-            valueFromText: function(text, locale) {
-                return Math.round(parseFloat(text.replace('°', '')) * 1000)
-            }
-        }
-        
-        QtControls2.Label {
-            id: locationDisplayLabel
-            Kirigami.FormData.label: "Current location:"
-            visible: cfg_TimingMode === 0
-            text: {
-                if (automaticLocationRadio.checked) {
-                    return `Auto: ${LocationDetection.formatCoordinates(latitudeSpinBox.realValue, longitudeSpinBox.realValue)}`
-                } else {
-                    return LocationDetection.formatCoordinates(latitudeSpinBox.realValue, longitudeSpinBox.realValue)
-                }
-            }
-            opacity: 0.8
-            font.pointSize: Kirigami.Theme.smallFont.pointSize
-        }
-        
-        QtControls2.Button {
-            Kirigami.FormData.label: "Current Time Information:"
-            text: "Show Time Periods"
-            onClicked: timeInfoPopup.open()
-        }
+    // (moved) Show Time Periods button now lives in the Timing Mode section above
         
         Kirigami.Separator {
             Kirigami.FormData.label: "Update Settings"
