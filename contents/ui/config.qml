@@ -20,6 +20,18 @@ ColumnLayout {
     property alias cfg_UpdateInterval: updateIntervalSpinBox.value
     property alias cfg_ShowDebug: debugCheckBox.checked
     property alias cfg_FillMode: fillModeConfig.value
+
+    // Custom timing properties
+    property alias cfg_TimingMode: timingModeConfig.value
+    property alias cfg_DawnTime: dawnTimeConfig.text
+    property alias cfg_EarlyMorningTime: earlyMorningTimeConfig.text
+    property alias cfg_DayTime: dayTimeConfig.text
+    property alias cfg_EveningTime: eveningTimeConfig.text
+    property alias cfg_DuskTime: duskTimeConfig.text
+    property alias cfg_NightTime: nightTimeConfig.text
+
+    // Guard to prevent writebacks during initialization
+    property bool __initializing: true
     
     property alias cfg_DawnImage: dawnImagePath.text
     property alias cfg_EarlyMorningImage: earlyMorningImagePath.text
@@ -37,6 +49,227 @@ ColumnLayout {
     
     Kirigami.FormLayout {
         Layout.fillWidth: true
+        Kirigami.Separator {
+            Kirigami.FormData.label: "Timing Mode"
+            Kirigami.FormData.isSection: true
+        }
+
+        // Hidden config holders
+        QtControls2.SpinBox { id: timingModeConfig; visible: false; value: 0 }
+        QtControls2.TextField { id: dawnTimeConfig; visible: false; text: "06:00" }
+        QtControls2.TextField { id: earlyMorningTimeConfig; visible: false; text: "07:30" }
+        QtControls2.TextField { id: dayTimeConfig; visible: false; text: "09:00" }
+        QtControls2.TextField { id: eveningTimeConfig; visible: false; text: "18:00" }
+        QtControls2.TextField { id: duskTimeConfig; visible: false; text: "20:00" }
+        QtControls2.TextField { id: nightTimeConfig; visible: false; text: "22:00" }
+
+        QtControls2.ButtonGroup { id: timingModeGroup }
+        QtControls2.RadioButton {
+            Kirigami.FormData.label: "Wallpaper timing:";
+            text: "Astronomical (sunrise/sunset)"
+            checked: cfg_TimingMode === 0
+            QtControls2.ButtonGroup.group: timingModeGroup
+            onCheckedChanged: if (checked && !root.__initializing) { cfg_TimingMode = 0; if (configDialog && configDialog.changed) configDialog.changed() }
+        }
+        QtControls2.RadioButton {
+            text: "Custom time periods"
+            checked: cfg_TimingMode === 1
+            QtControls2.ButtonGroup.group: timingModeGroup
+            onCheckedChanged: if (checked && !root.__initializing) { cfg_TimingMode = 1; if (configDialog && configDialog.changed) configDialog.changed() }
+        }
+
+        // Custom time pickers
+        RowLayout {
+            Kirigami.FormData.label: "Dawn starts at:"; visible: cfg_TimingMode === 1
+            QtControls2.SpinBox { id: dawnH; from: 0; to: 23; value: 6; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { dawnTimeConfig.text = `${dawnH.value.toString().padStart(2,'0')}:${dawnM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
+            QtControls2.Label { text: ":" }
+            QtControls2.SpinBox { id: dawnM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { dawnTimeConfig.text = `${dawnH.value.toString().padStart(2,'0')}:${dawnM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
+        }
+        RowLayout {
+            Kirigami.FormData.label: "Early morning:"; visible: cfg_TimingMode === 1
+            QtControls2.SpinBox { id: earlyH; from: 0; to: 23; value: 7; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { earlyMorningTimeConfig.text = `${earlyH.value.toString().padStart(2,'0')}:${earlyM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
+            QtControls2.Label { text: ":" }
+            QtControls2.SpinBox { id: earlyM; from: 0; to: 59; value: 30; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { earlyMorningTimeConfig.text = `${earlyH.value.toString().padStart(2,'0')}:${earlyM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
+        }
+        RowLayout {
+            Kirigami.FormData.label: "Day starts at:"; visible: cfg_TimingMode === 1
+            QtControls2.SpinBox { id: dayH; from: 0; to: 23; value: 9; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { dayTimeConfig.text = `${dayH.value.toString().padStart(2,'0')}:${dayM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
+            QtControls2.Label { text: ":" }
+            QtControls2.SpinBox { id: dayM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { dayTimeConfig.text = `${dayH.value.toString().padStart(2,'0')}:${dayM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
+        }
+        RowLayout {
+            Kirigami.FormData.label: "Evening starts at:"; visible: cfg_TimingMode === 1
+            QtControls2.SpinBox { id: eveH; from: 0; to: 23; value: 18; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { eveningTimeConfig.text = `${eveH.value.toString().padStart(2,'0')}:${eveM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
+            QtControls2.Label { text: ":" }
+            QtControls2.SpinBox { id: eveM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { eveningTimeConfig.text = `${eveH.value.toString().padStart(2,'0')}:${eveM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
+        }
+        RowLayout {
+            Kirigami.FormData.label: "Dusk starts at:"; visible: cfg_TimingMode === 1
+            QtControls2.SpinBox { id: duskH; from: 0; to: 23; value: 20; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { duskTimeConfig.text = `${duskH.value.toString().padStart(2,'0')}:${duskM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
+            QtControls2.Label { text: ":" }
+            QtControls2.SpinBox { id: duskM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { duskTimeConfig.text = `${duskH.value.toString().padStart(2,'0')}:${duskM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
+        }
+        RowLayout {
+            Kirigami.FormData.label: "Night starts at:"; visible: cfg_TimingMode === 1
+            QtControls2.SpinBox { id: nightH; from: 0; to: 23; value: 22; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { nightTimeConfig.text = `${nightH.value.toString().padStart(2,'0')}:${nightM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
+            QtControls2.Label { text: ":" }
+            QtControls2.SpinBox { id: nightM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { nightTimeConfig.text = `${nightH.value.toString().padStart(2,'0')}:${nightM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
+        }
+        
+        // Keep spinboxes in sync when cfg_* text changes (e.g., when loading saved config)
+        Component.onCompleted: {
+            function setFromText(text, hSpin, mSpin) {
+                const parts = (text || "00:00").split(":");
+                const h = Math.max(0, Math.min(23, parseInt(parts[0] || 0)));
+                const m = Math.max(0, Math.min(59, parseInt(parts[1] || 0)));
+                hSpin.value = h; mSpin.value = m;
+            }
+            root.__initializing = true
+            setFromText(dawnTimeConfig.text, dawnH, dawnM)
+            setFromText(earlyMorningTimeConfig.text, earlyH, earlyM)
+            setFromText(dayTimeConfig.text, dayH, dayM)
+            setFromText(eveningTimeConfig.text, eveH, eveM)
+            setFromText(duskTimeConfig.text, duskH, duskM)
+            setFromText(nightTimeConfig.text, nightH, nightM)
+            root.__initializing = false
+        }
+        
+        // Hidden fields react to text changes and update visible spinboxes
+        Connections { target: dawnTimeConfig; function onTextChanged() { root.__initializing = true; const p = dawnTimeConfig.text.split(":"); dawnH.value = parseInt(p[0]||0); dawnM.value = parseInt(p[1]||0); root.__initializing = false } }
+        Connections { target: earlyMorningTimeConfig; function onTextChanged() { root.__initializing = true; const p = earlyMorningTimeConfig.text.split(":"); earlyH.value = parseInt(p[0]||0); earlyM.value = parseInt(p[1]||0); root.__initializing = false } }
+        Connections { target: dayTimeConfig; function onTextChanged() { root.__initializing = true; const p = dayTimeConfig.text.split(":"); dayH.value = parseInt(p[0]||0); dayM.value = parseInt(p[1]||0); root.__initializing = false } }
+        Connections { target: eveningTimeConfig; function onTextChanged() { root.__initializing = true; const p = eveningTimeConfig.text.split(":"); eveH.value = parseInt(p[0]||0); eveM.value = parseInt(p[1]||0); root.__initializing = false } }
+        Connections { target: duskTimeConfig; function onTextChanged() { root.__initializing = true; const p = duskTimeConfig.text.split(":"); duskH.value = parseInt(p[0]||0); duskM.value = parseInt(p[1]||0); root.__initializing = false } }
+        Connections { target: nightTimeConfig; function onTextChanged() { root.__initializing = true; const p = nightTimeConfig.text.split(":"); nightH.value = parseInt(p[0]||0); nightM.value = parseInt(p[1]||0); root.__initializing = false } }
+
+        // Show time periods button (belongs to Timing Mode section)
+        QtControls2.Button {
+            Kirigami.FormData.label: "Current Time Information:"
+            text: "Show Time Periods"
+            onClicked: timeInfoPopup.open()
+        }
+        
+        // Location (Astronomical) Settings — shown only when using Astronomical timing
+        Kirigami.Separator {
+            Kirigami.FormData.label: "Location Settings"
+            Kirigami.FormData.isSection: true
+            visible: cfg_TimingMode === 0
+        }
+        
+        QtControls2.ButtonGroup { id: locationModeGroup }
+        
+        QtControls2.RadioButton {
+            id: automaticIPLocationRadio
+            Kirigami.FormData.label: "Location mode:"
+            text: "Automatic (IP-based geolocation)"
+            visible: cfg_TimingMode === 0
+            checked: cfg_LocationMode === 0
+            QtControls2.ButtonGroup.group: locationModeGroup
+            onCheckedChanged: {
+                if (checked && !root.__initializing) {
+                    cfg_LocationMode = 0
+                    detectIPLocation()
+                }
+            }
+        }
+        
+        QtControls2.RadioButton {
+            id: automaticTimezoneRadio
+            text: "Automatic (timezone estimation)"
+            visible: cfg_TimingMode === 0
+            checked: cfg_LocationMode === 2
+            QtControls2.ButtonGroup.group: locationModeGroup
+            onCheckedChanged: {
+                if (checked && !root.__initializing) {
+                    cfg_LocationMode = 2
+                    detectTimezoneLocation()
+                }
+            }
+        }
+        
+        QtControls2.RadioButton {
+            id: manualLocationRadio
+            text: "Manual coordinates"
+            visible: cfg_TimingMode === 0
+            checked: cfg_LocationMode === 1
+            QtControls2.ButtonGroup.group: locationModeGroup
+            onCheckedChanged: {
+                if (checked && !root.__initializing) {
+                    cfg_LocationMode = 1
+                }
+            }
+        }
+        
+        QtControls2.Button {
+            Kirigami.FormData.label: ""
+            text: "Detect Location from IP"
+            visible: cfg_TimingMode === 0 && automaticIPLocationRadio.checked
+            onClicked: detectIPLocation()
+        }
+        
+        QtControls2.Button {
+            Kirigami.FormData.label: ""
+            text: "Detect Location from Timezone" 
+            visible: cfg_TimingMode === 0 && automaticTimezoneRadio.checked
+            onClicked: detectTimezoneLocation()
+        }
+        
+        QtControls2.SpinBox {
+            id: latitudeSpinBox
+            Kirigami.FormData.label: "Latitude:"
+            from: -90000
+            to: 90000
+            stepSize: 1
+            value: 40728  // Default: NYC (40.728)
+            enabled: cfg_TimingMode === 0 && manualLocationRadio.checked
+            visible: cfg_TimingMode === 0
+            
+            property real realValue: value / 1000
+            
+            textFromValue: function(value, locale) {
+                return (value / 1000).toFixed(3) + "°"
+            }
+            
+            valueFromText: function(text, locale) {
+                return Math.round(parseFloat(text.replace('°', '')) * 1000)
+            }
+        }
+        
+        QtControls2.SpinBox {
+            id: longitudeSpinBox
+            Kirigami.FormData.label: "Longitude:"
+            from: -180000
+            to: 180000
+            stepSize: 1
+            value: -74006  // Default: NYC (-74.006)
+            enabled: cfg_TimingMode === 0 && manualLocationRadio.checked
+            visible: cfg_TimingMode === 0
+            
+            property real realValue: value / 1000
+            
+            textFromValue: function(value, locale) {
+                return (value / 1000).toFixed(3) + "°"
+            }
+            
+            valueFromText: function(text, locale) {
+                return Math.round(parseFloat(text.replace('°', '')) * 1000)
+            }
+        }
+        
+        QtControls2.Label {
+            id: locationDisplayLabel
+            Kirigami.FormData.label: "Current location:"
+            visible: cfg_TimingMode === 0
+            text: {
+                if (automaticIPLocationRadio.checked || automaticTimezoneRadio.checked) {
+                    return `Auto: ${LocationDetection.formatCoordinates(latitudeSpinBox.realValue, longitudeSpinBox.realValue)}`
+                } else {
+                    return LocationDetection.formatCoordinates(latitudeSpinBox.realValue, longitudeSpinBox.realValue)
+                }
+            }
+            opacity: 0.8
+            font.pointSize: Kirigami.Theme.smallFont.pointSize
+        }
         
         Kirigami.Separator {
             Kirigami.FormData.label: "Wallpaper Images"
@@ -476,136 +709,8 @@ ColumnLayout {
             }
         }
         
-        Kirigami.Separator {
-            Kirigami.FormData.label: "Location Settings"
-            Kirigami.FormData.isSection: true
-        }
         
-        QtControls2.ButtonGroup {
-            id: locationModeGroup
-        }
-        
-        QtControls2.RadioButton {
-            id: automaticIPLocationRadio
-            Kirigami.FormData.label: "Location mode:"
-            text: "Automatic (IP-based geolocation)"
-            checked: cfg_LocationMode === 0
-            QtControls2.ButtonGroup.group: locationModeGroup
-            onCheckedChanged: {
-                if (checked) {
-                    cfg_LocationMode = 0
-                    detectIPLocation()
-                }
-            }
-            Component.onCompleted: {
-                console.log("IP geolocation radio button created")
-            }
-        }
-        
-        QtControls2.RadioButton {
-            id: automaticTimezoneRadio
-            text: "Automatic (timezone estimation)"
-            checked: cfg_LocationMode === 2
-            QtControls2.ButtonGroup.group: locationModeGroup
-            onCheckedChanged: {
-                if (checked) {
-                    cfg_LocationMode = 2
-                    detectTimezoneLocation()
-                }
-            }
-            Component.onCompleted: {
-                console.log("Timezone radio button created")
-            }
-        }
-        
-        QtControls2.RadioButton {
-            id: manualLocationRadio
-            text: "Manual coordinates"
-            checked: cfg_LocationMode === 1
-            QtControls2.ButtonGroup.group: locationModeGroup
-            onCheckedChanged: {
-                if (checked) {
-                    cfg_LocationMode = 1
-                }
-            }
-            Component.onCompleted: {
-                console.log("Manual location radio button created")
-            }
-        }
-        
-        QtControls2.Button {
-            Kirigami.FormData.label: ""
-            text: "Detect Location from IP"
-            visible: automaticIPLocationRadio.checked
-            onClicked: detectIPLocation()
-        }
-        
-        QtControls2.Button {
-            Kirigami.FormData.label: ""
-            text: "Detect Location from Timezone" 
-            visible: automaticTimezoneRadio.checked
-            onClicked: detectTimezoneLocation()
-        }
-        
-        QtControls2.SpinBox {
-            id: latitudeSpinBox
-            Kirigami.FormData.label: "Latitude:"
-            from: -90000
-            to: 90000
-            stepSize: 1
-            value: 40728  // Default: NYC (40.728)
-            enabled: manualLocationRadio.checked
-            
-            property real realValue: value / 1000
-            
-            textFromValue: function(value, locale) {
-                return (value / 1000).toFixed(3) + "°"
-            }
-            
-            valueFromText: function(text, locale) {
-                return Math.round(parseFloat(text.replace('°', '')) * 1000)
-            }
-        }
-        
-        QtControls2.SpinBox {
-            id: longitudeSpinBox
-            Kirigami.FormData.label: "Longitude:"
-            from: -180000
-            to: 180000
-            stepSize: 1
-            value: -74006  // Default: NYC (-74.006)
-            enabled: manualLocationRadio.checked
-            
-            property real realValue: value / 1000
-            
-            textFromValue: function(value, locale) {
-                return (value / 1000).toFixed(3) + "°"
-            }
-            
-            valueFromText: function(text, locale) {
-                return Math.round(parseFloat(text.replace('°', '')) * 1000)
-            }
-        }
-        
-        QtControls2.Label {
-            id: locationDisplayLabel
-            Kirigami.FormData.label: "Current location:"
-            text: {
-                if (automaticLocationRadio.checked) {
-                    return `Auto: ${LocationDetection.formatCoordinates(latitudeSpinBox.realValue, longitudeSpinBox.realValue)}`
-                } else {
-                    return LocationDetection.formatCoordinates(latitudeSpinBox.realValue, longitudeSpinBox.realValue)
-                }
-            }
-            opacity: 0.8
-            font.pointSize: Kirigami.Theme.smallFont.pointSize
-        }
-        
-        QtControls2.Button {
-            Kirigami.FormData.label: "Current Time Information:"
-            text: "Show Time Periods"
-            onClicked: timeInfoPopup.open()
-        }
+    // (moved) Show Time Periods button now lives in the Timing Mode section above
         
         Kirigami.Separator {
             Kirigami.FormData.label: "Update Settings"
@@ -714,13 +819,60 @@ ColumnLayout {
                     const lat = latitudeSpinBox.realValue
                     const lon = longitudeSpinBox.realValue
                     const now = new Date()
-                    
+
                     let info = `Location: ${lat.toFixed(3)}°, ${lon.toFixed(3)}°\n`
                     info += `Current Time: ${now.toLocaleString()}\n\n`
-                    
-                    // Calculate times using TimeCalc
+
+                    if (cfg_TimingMode === 1) {
+                        // Custom time mode
+                        const c = {
+                            dawn: dawnTimeConfig.text || "06:00",
+                            early: earlyMorningTimeConfig.text || "07:30",
+                            day: dayTimeConfig.text || "09:00",
+                            eve: eveningTimeConfig.text || "18:00",
+                            dusk: duskTimeConfig.text || "20:00",
+                            night: nightTimeConfig.text || "22:00"
+                        }
+
+                        info += "Custom Time Periods (HH:MM):\n\n"
+                        info += `🌅 Dawn: ${c.dawn}\n`
+                        info += `🌇 Early Morning: ${c.early}\n`
+                        info += `☀️ Day: ${c.day}\n`
+                        info += `🌆 Evening: ${c.eve}\n`
+                        info += `🌇 Dusk: ${c.dusk}\n`
+                        info += `🌙 Night: ${c.night}\n\n`
+
+                        // Show intervals and current period
+                        function mm(t){ return TimeCalc.timeToMinutes(TimeCalc.parseTimeString(t)) }
+                        const mNow = now.getHours()*60 + now.getMinutes()
+                        const intervals = [
+                            {label:"🌅 Dawn", start:mm(c.dawn), end:mm(c.early)},
+                            {label:"🌇 Early Morning", start:mm(c.early), end:mm(c.day)},
+                            {label:"☀️ Day", start:mm(c.day), end:mm(c.eve)},
+                            {label:"🌆 Evening", start:mm(c.eve), end:mm(c.dusk)},
+                            {label:"🌇 Dusk", start:mm(c.dusk), end:mm(c.night)},
+                            {label:"🌙 Night", start:mm(c.night), end:mm(c.dawn)+24*60}
+                        ]
+                        let currentLabel = ""
+                        for (let i=0;i<intervals.length;i++){
+                            const s = intervals[i].start
+                            const e = intervals[i].end
+                            const within = (s <= e ? (mNow>=s && mNow<e) : (mNow>=s || mNow<e))
+                            if (within && !currentLabel) currentLabel = intervals[i].label
+                        }
+                        info += "Intervals:\n"
+                        info += `${c.dawn} → ${c.early} (Dawn)\n`
+                        info += `${c.early} → ${c.day} (Early Morning)\n`
+                        info += `${c.day} → ${c.eve} (Day)\n`
+                        info += `${c.eve} → ${c.dusk} (Evening)\n`
+                        info += `${c.dusk} → ${c.night} (Dusk)\n`
+                        info += `${c.night} → next ${c.dawn} (Night)\n\n`
+                        if (currentLabel) info += `Current period: ${currentLabel}\n`
+                        return info
+                    }
+
+                    // Astronomical mode
                     const times = TimeCalc.getTwilightTimes(now, lat, lon)
-                    
                     if (times) {
                         info += "Today's Time Periods:\n\n"
                         info += `Astronomical Dawn: ${formatTime(times.astronomicalTwilightSunrise)}\n`
@@ -729,7 +881,7 @@ ColumnLayout {
                         info += `Sunset: ${formatTime(times.sunset)}\n`
                         info += `Civil Dusk: ${formatTime(times.civilTwilightSunset)}\n`
                         info += `Astronomical Dusk: ${formatTime(times.astronomicalTwilightSunset)}\n\n`
-                        
+
                         info += "Wallpaper Periods:\n\n"
                         info += `🌅 Dawn: ${formatTime(times.astronomicalTwilightSunrise)} - ${formatTime(times.civilTwilightSunrise)}\n`
                         info += `🌇 Early Morning: ${formatTime(times.civilTwilightSunrise)} - ${formatTime(times.sunrise + 2)}\n`
@@ -741,7 +893,7 @@ ColumnLayout {
                         info += "Unable to calculate times for this location.\n"
                         info += "You may be in a polar region or the coordinates are invalid."
                     }
-                    
+
                     return info
                 }
                 
