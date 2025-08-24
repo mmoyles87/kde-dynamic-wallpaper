@@ -29,6 +29,9 @@ ColumnLayout {
     property alias cfg_EveningTime: eveningTimeConfig.text
     property alias cfg_DuskTime: duskTimeConfig.text
     property alias cfg_NightTime: nightTimeConfig.text
+
+    // Guard to prevent writebacks during initialization
+    property bool __initializing: true
     
     property alias cfg_DawnImage: dawnImagePath.text
     property alias cfg_EarlyMorningImage: earlyMorningImagePath.text
@@ -66,52 +69,78 @@ ColumnLayout {
             text: "Astronomical (sunrise/sunset)"
             checked: cfg_TimingMode === 0
             QtControls2.ButtonGroup.group: timingModeGroup
-            onCheckedChanged: if (checked) cfg_TimingMode = 0
+            onCheckedChanged: if (checked && !root.__initializing) { cfg_TimingMode = 0; if (configDialog && configDialog.changed) configDialog.changed() }
         }
         QtControls2.RadioButton {
             text: "Custom time periods"
             checked: cfg_TimingMode === 1
             QtControls2.ButtonGroup.group: timingModeGroup
-            onCheckedChanged: if (checked) cfg_TimingMode = 1
+            onCheckedChanged: if (checked && !root.__initializing) { cfg_TimingMode = 1; if (configDialog && configDialog.changed) configDialog.changed() }
         }
 
         // Custom time pickers
         RowLayout {
             Kirigami.FormData.label: "Dawn starts at:"; visible: cfg_TimingMode === 1
-            QtControls2.SpinBox { id: dawnH; from: 0; to: 23; value: 6; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: dawnTimeConfig.text = `${dawnH.value.toString().padStart(2,'0')}:${dawnM.value.toString().padStart(2,'0')}` }
+            QtControls2.SpinBox { id: dawnH; from: 0; to: 23; value: 6; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { dawnTimeConfig.text = `${dawnH.value.toString().padStart(2,'0')}:${dawnM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
             QtControls2.Label { text: ":" }
-            QtControls2.SpinBox { id: dawnM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: dawnTimeConfig.text = `${dawnH.value.toString().padStart(2,'0')}:${dawnM.value.toString().padStart(2,'0')}` }
+            QtControls2.SpinBox { id: dawnM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { dawnTimeConfig.text = `${dawnH.value.toString().padStart(2,'0')}:${dawnM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
         }
         RowLayout {
             Kirigami.FormData.label: "Early morning:"; visible: cfg_TimingMode === 1
-            QtControls2.SpinBox { id: earlyH; from: 0; to: 23; value: 7; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: earlyMorningTimeConfig.text = `${earlyH.value.toString().padStart(2,'0')}:${earlyM.value.toString().padStart(2,'0')}` }
+            QtControls2.SpinBox { id: earlyH; from: 0; to: 23; value: 7; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { earlyMorningTimeConfig.text = `${earlyH.value.toString().padStart(2,'0')}:${earlyM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
             QtControls2.Label { text: ":" }
-            QtControls2.SpinBox { id: earlyM; from: 0; to: 59; value: 30; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: earlyMorningTimeConfig.text = `${earlyH.value.toString().padStart(2,'0')}:${earlyM.value.toString().padStart(2,'0')}` }
+            QtControls2.SpinBox { id: earlyM; from: 0; to: 59; value: 30; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { earlyMorningTimeConfig.text = `${earlyH.value.toString().padStart(2,'0')}:${earlyM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
         }
         RowLayout {
             Kirigami.FormData.label: "Day starts at:"; visible: cfg_TimingMode === 1
-            QtControls2.SpinBox { id: dayH; from: 0; to: 23; value: 9; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: dayTimeConfig.text = `${dayH.value.toString().padStart(2,'0')}:${dayM.value.toString().padStart(2,'0')}` }
+            QtControls2.SpinBox { id: dayH; from: 0; to: 23; value: 9; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { dayTimeConfig.text = `${dayH.value.toString().padStart(2,'0')}:${dayM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
             QtControls2.Label { text: ":" }
-            QtControls2.SpinBox { id: dayM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: dayTimeConfig.text = `${dayH.value.toString().padStart(2,'0')}:${dayM.value.toString().padStart(2,'0')}` }
+            QtControls2.SpinBox { id: dayM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { dayTimeConfig.text = `${dayH.value.toString().padStart(2,'0')}:${dayM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
         }
         RowLayout {
             Kirigami.FormData.label: "Evening starts at:"; visible: cfg_TimingMode === 1
-            QtControls2.SpinBox { id: eveH; from: 0; to: 23; value: 18; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: eveningTimeConfig.text = `${eveH.value.toString().padStart(2,'0')}:${eveM.value.toString().padStart(2,'0')}` }
+            QtControls2.SpinBox { id: eveH; from: 0; to: 23; value: 18; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { eveningTimeConfig.text = `${eveH.value.toString().padStart(2,'0')}:${eveM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
             QtControls2.Label { text: ":" }
-            QtControls2.SpinBox { id: eveM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: eveningTimeConfig.text = `${eveH.value.toString().padStart(2,'0')}:${eveM.value.toString().padStart(2,'0')}` }
+            QtControls2.SpinBox { id: eveM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { eveningTimeConfig.text = `${eveH.value.toString().padStart(2,'0')}:${eveM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
         }
         RowLayout {
             Kirigami.FormData.label: "Dusk starts at:"; visible: cfg_TimingMode === 1
-            QtControls2.SpinBox { id: duskH; from: 0; to: 23; value: 20; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: duskTimeConfig.text = `${duskH.value.toString().padStart(2,'0')}:${duskM.value.toString().padStart(2,'0')}` }
+            QtControls2.SpinBox { id: duskH; from: 0; to: 23; value: 20; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { duskTimeConfig.text = `${duskH.value.toString().padStart(2,'0')}:${duskM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
             QtControls2.Label { text: ":" }
-            QtControls2.SpinBox { id: duskM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: duskTimeConfig.text = `${duskH.value.toString().padStart(2,'0')}:${duskM.value.toString().padStart(2,'0')}` }
+            QtControls2.SpinBox { id: duskM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { duskTimeConfig.text = `${duskH.value.toString().padStart(2,'0')}:${duskM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
         }
         RowLayout {
             Kirigami.FormData.label: "Night starts at:"; visible: cfg_TimingMode === 1
-            QtControls2.SpinBox { id: nightH; from: 0; to: 23; value: 22; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: nightTimeConfig.text = `${nightH.value.toString().padStart(2,'0')}:${nightM.value.toString().padStart(2,'0')}` }
+            QtControls2.SpinBox { id: nightH; from: 0; to: 23; value: 22; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { nightTimeConfig.text = `${nightH.value.toString().padStart(2,'0')}:${nightM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
             QtControls2.Label { text: ":" }
-            QtControls2.SpinBox { id: nightM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: nightTimeConfig.text = `${nightH.value.toString().padStart(2,'0')}:${nightM.value.toString().padStart(2,'0')}` }
+            QtControls2.SpinBox { id: nightM; from: 0; to: 59; value: 0; textFromValue: v=>v.toString().padStart(2,'0'); onValueChanged: if (!root.__initializing) { nightTimeConfig.text = `${nightH.value.toString().padStart(2,'0')}:${nightM.value.toString().padStart(2,'0')}`; if (configDialog && configDialog.changed) configDialog.changed() } }
         }
+        
+        // Keep spinboxes in sync when cfg_* text changes (e.g., when loading saved config)
+        Component.onCompleted: {
+            function setFromText(text, hSpin, mSpin) {
+                const parts = (text || "00:00").split(":");
+                const h = Math.max(0, Math.min(23, parseInt(parts[0] || 0)));
+                const m = Math.max(0, Math.min(59, parseInt(parts[1] || 0)));
+                hSpin.value = h; mSpin.value = m;
+            }
+            root.__initializing = true
+            setFromText(dawnTimeConfig.text, dawnH, dawnM)
+            setFromText(earlyMorningTimeConfig.text, earlyH, earlyM)
+            setFromText(dayTimeConfig.text, dayH, dayM)
+            setFromText(eveningTimeConfig.text, eveH, eveM)
+            setFromText(duskTimeConfig.text, duskH, duskM)
+            setFromText(nightTimeConfig.text, nightH, nightM)
+            root.__initializing = false
+        }
+        
+        // Hidden fields react to text changes and update visible spinboxes
+        Connections { target: dawnTimeConfig; function onTextChanged() { root.__initializing = true; const p = dawnTimeConfig.text.split(":"); dawnH.value = parseInt(p[0]||0); dawnM.value = parseInt(p[1]||0); root.__initializing = false } }
+        Connections { target: earlyMorningTimeConfig; function onTextChanged() { root.__initializing = true; const p = earlyMorningTimeConfig.text.split(":"); earlyH.value = parseInt(p[0]||0); earlyM.value = parseInt(p[1]||0); root.__initializing = false } }
+        Connections { target: dayTimeConfig; function onTextChanged() { root.__initializing = true; const p = dayTimeConfig.text.split(":"); dayH.value = parseInt(p[0]||0); dayM.value = parseInt(p[1]||0); root.__initializing = false } }
+        Connections { target: eveningTimeConfig; function onTextChanged() { root.__initializing = true; const p = eveningTimeConfig.text.split(":"); eveH.value = parseInt(p[0]||0); eveM.value = parseInt(p[1]||0); root.__initializing = false } }
+        Connections { target: duskTimeConfig; function onTextChanged() { root.__initializing = true; const p = duskTimeConfig.text.split(":"); duskH.value = parseInt(p[0]||0); duskM.value = parseInt(p[1]||0); root.__initializing = false } }
+        Connections { target: nightTimeConfig; function onTextChanged() { root.__initializing = true; const p = nightTimeConfig.text.split(":"); nightH.value = parseInt(p[0]||0); nightM.value = parseInt(p[1]||0); root.__initializing = false } }
         
         Kirigami.Separator {
             Kirigami.FormData.label: "Wallpaper Images"
@@ -569,7 +598,7 @@ ColumnLayout {
             checked: cfg_LocationMode === 0
             QtControls2.ButtonGroup.group: locationModeGroup
             onCheckedChanged: {
-                if (checked) {
+                if (checked && !root.__initializing) {
                     cfg_LocationMode = 0
                     detectIPLocation()
                 }
@@ -586,7 +615,7 @@ ColumnLayout {
             checked: cfg_LocationMode === 2
             QtControls2.ButtonGroup.group: locationModeGroup
             onCheckedChanged: {
-                if (checked) {
+                if (checked && !root.__initializing) {
                     cfg_LocationMode = 2
                     detectTimezoneLocation()
                 }
@@ -602,7 +631,7 @@ ColumnLayout {
             checked: cfg_LocationMode === 1
             QtControls2.ButtonGroup.group: locationModeGroup
             onCheckedChanged: {
-                if (checked) {
+                if (checked && !root.__initializing) {
                     cfg_LocationMode = 1
                 }
             }
