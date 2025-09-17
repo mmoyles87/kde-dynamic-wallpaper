@@ -206,14 +206,6 @@ cd kde6-dynamic-wallpaper
 ./dev-helper.sh install
 ```
 
-### KDE Store Publishing
-
-1. Visit [KDE Store](https://store.kde.org/)
-2. Login and click "Add Product"
-3. Select category: Plasma Addons > Wallpapers
-4. Upload the generated `.tar.xz` file
-5. Fill in description, screenshots, and metadata
-
 ## Troubleshooting
 
 ### Common Issues
